@@ -221,10 +221,11 @@ public class GroovyProcessorBase
             Iterator it1 = rdef.getConfiguration().getKeys();
             while (it1.hasNext())
             {
-                String key = (String) it1.next();
-
+                String key = ((String) it1.next());
+                String varname = key.trim().replaceAll("\\.", "_") + "_" + rdef.getPosition();
                 value = rdef.getConfiguration().getString(key);
-                binding.setVariable(key.replaceAll("\\.", "_") + "_" + rdef.getPosition(), value);
+                if(varname.trim().matches("[a-zA-Z0-9_]*"))
+                    binding.setVariable(varname, value);
             }
         }
         log.info(buildLogger.addBuildLogEntry("GroovyShell bindings: "));
@@ -235,18 +236,23 @@ public class GroovyProcessorBase
                  log.info(buildLogger.addBuildLogEntry("    " + s + "=" + binding.getVariable(s)));
         }
         
-        log.info(buildLogger.addBuildLogEntry("GroovyShell starting"));
+        log.info(buildLogger.addBuildLogEntry("Groovy Shell starting"));
         Object result = null;
         try
         {
             GroovyShell shell = new GroovyShell(binding);
 
             result = shell.evaluate("try{ " + groovy + " }catch(Exception e){ e.printStackTrace(); }");
+            
+            if(result == null)
+                result = "null";
+            
             logEntry = new SimpleLogEntry(
                     "Groovy Result: "
                     + groovy + " replaced with " + result.toString());
+            
             log.info(buildLogger.addBuildLogEntry(logEntry));
-        } catch (Exception e)
+        } catch (Throwable e)
         {
             buildLogger.addErrorLogEntry(e.getMessage(), e);
 
