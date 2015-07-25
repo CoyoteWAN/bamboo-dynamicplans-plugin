@@ -113,48 +113,24 @@ public class GroovyProcessorBase
                     .getLogger(this.buildContext.getPlanResultKey());
 
             Map customConfiguration = buildContext.getBuildDefinition().getCustomConfiguration();
-            if (customConfiguration == null || customConfiguration.get("custom.bamboo.condition.list") == null)
+            if (customConfiguration == null || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST) == null
+                    || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST).toString().trim().length() == 0)
             {
 
                 log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("conditions not set, skipping")));
             } else
             {
-                String condition = customConfiguration.get("custom.bamboo.condition.list").toString();
-                String expression = customConfiguration.get("custom.bamboo.tasks.reg.list").toString();
+                String condition = customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST).toString();
+                String expression = customConfiguration.get(CUSTOM_BAMBOO_TASKS_REG_LIST).toString();
                 if (expression == null || expression.trim().length() == 0)
                 {
                     expression = ".*";
                 }
                 value = calculateGroovy("Condition", nestedVariables, condition);
 
-                
-
                 for (TaskDefinition td : this.buildContext.getTaskDefinitions())
                 {
                     if (td.getUserDescription().matches(expression))
-                    {
-                        td.setEnabled(false);
-                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Setting state :" +customConfiguration.get("custom.bamboo.tasks.reg.list").toString() + 
-                            " for task " + td.getUserDescription())));
-                    }
-
-                }
-
-            }
-
-            if (customConfiguration == null || customConfiguration.get("custom.bamboo.task.list") == null)
-            {
-
-                log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("tasks list not set, skipping")));
-            } else
-            {
-                String condition = customConfiguration.get("custom.bamboo.task.list").toString();
-
-                value = calculateGroovy("Condition", nestedVariables, condition);
-
-                for (TaskDefinition td : this.buildContext.getTaskDefinitions())
-                {
-                    if (td.getUserDescription().matches(value))
                     {
                         td.setEnabled(false);
                         log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task:" + td.getUserDescription())));
@@ -165,16 +141,52 @@ public class GroovyProcessorBase
 
             }
 
+            if (customConfiguration == null || customConfiguration.get(CUSTOMBAMBOOTASKLIST) == null
+                    || customConfiguration.get(CUSTOMBAMBOOTASKLIST).toString().trim().length() == 0)
+            {
+
+                log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("tasks list not set, skipping")));
+            } else
+            {
+                String condition = customConfiguration.get(CUSTOMBAMBOOTASKLIST).toString();
+
+                value = calculateGroovy("Condition", nestedVariables, condition);
+
+                for (TaskDefinition td : this.buildContext.getTaskDefinitions())
+                {
+                    if (td.getUserDescription().matches(value))
+                    {                        
+                        td.setEnabled(customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("true"));
+                        
+                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Setting state :" 
+                                + customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString()
+                                + " for task " 
+                                + td.getUserDescription())));
+                    }
+                    else
+                    {
+                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry( 
+                                td.getUserDescription() + " is not matching " + value)));
+                    }
+
+                }
+
+            }
+
         } catch (Exception e)
         {
-            log.error("Bamboo Nested Variables: an unexpected exception occurred."
+            log.error("Bamboo Groovy Variables: an unexpected exception occurred."
                     + e.getMessage());
         }
 
     }
+    private static final String CUSTOM_BAMBOO_TASK_ACTION = "custom.bamboo.task.action";
+    private static final String CUSTOM_BAMBOO_TASKS_REG_LIST = "custom.bamboo.tasks.reg.list";
+    private static final String CUSTOM_BAMBOO_CONDITION_LIST = "custom.bamboo.condition.list";
+    private static final String CUSTOMBAMBOOTASKLIST = "custom.bamboo.task.list";
     private static final String SCRIPT = "script:";
 
-    private String calculateGroovy(String name, Map nestedVariables, String s)
+    private String calculateGroovy(String name, Map nestedVariables, String groovy)
     {
 
         BuildLogger buildLogger = getBuildLoggerManager()
@@ -215,16 +227,24 @@ public class GroovyProcessorBase
                 binding.setVariable(key.replaceAll("\\.", "_") + "_" + rdef.getPosition(), value);
             }
         }
+        log.info(buildLogger.addBuildLogEntry("GroovyShell bindings: "));
+        for ( it = binding.getVariables().keySet().iterator(); it.hasNext();)
+        {
+            String s = (String) it.next();    
+            if(!s.toLowerCase().contains("password"))
+                 log.info(buildLogger.addBuildLogEntry("    " + s + "=" + binding.getVariable(s)));
+        }
+        
         log.info(buildLogger.addBuildLogEntry("GroovyShell starting"));
         Object result = null;
         try
         {
             GroovyShell shell = new GroovyShell(binding);
 
-            result = shell.evaluate(s);
+            result = shell.evaluate(groovy);
             logEntry = new SimpleLogEntry(
                     "Groovy Result: "
-                    + s + " replaced with " + result.toString());
+                    + groovy + " replaced with " + result.toString());
             log.info(buildLogger.addBuildLogEntry(logEntry));
         } catch (Exception e)
         {

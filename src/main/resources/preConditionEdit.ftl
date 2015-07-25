@@ -10,7 +10,7 @@
 [@ui.bambooSection title='Dynamic Tasks Switcher' ]
 
     [@ww.textarea name='custom.bamboo.task.list' 
-            label='Groovy REGEX calculator' 
+            label='Groovy REGEX calculator' class='text-area long-field '
             description='Groovy that will return a regular expression. Any tasks with matching description will be toggled.' /]
 
     [@ww.checkbox label='Task Should be Enabled' name='custom.bamboo.task.action' toggle='true' description='Desired Matched Task State' /]
