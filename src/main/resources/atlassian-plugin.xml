@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+        <param name="atlassian-licensing-enabled">false</param>
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+    </plugin-info>
+    <!-- add our i18n resource -->
+    <resource type="i18n" name="i18n" location="groovyVars"/>
+    <!-- add our web resources -->
+    <web-resource key="groovyVars-resources" name="groovyVars Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <resource type="download" name="groovyVars.css" location="/css/groovyVars.css"/>
+        <resource type="download" name="groovyVars.js" location="/js/groovyVars.js"/>
+        <resource type="download" name="images/" location="/images"/>
+        <context>groovyVars</context>
+    </web-resource>
+    <!-- publish our component -->
+    <preBuildQueuedAction key="groovyResolverQueueAction" name="Bamboo Groovy Variables - Pre Build Queued Action" class="org.valens.GroovyResolverQueueAction"/>
+    <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.GroovyResolver" >
+        <resource type="freemarker" name="edit" location="preCommandRunnerEdit.ftl"/>
+        <resource type="freemarker" name="view" location="preCommandRunnerView.ftl"/>
+        <description>Runs an arbitrary command on the command line before a build runs.</description>
+    </preBuildAction>
+</atlassian-plugin>
