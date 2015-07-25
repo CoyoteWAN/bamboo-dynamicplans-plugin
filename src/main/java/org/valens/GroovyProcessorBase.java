@@ -241,7 +241,7 @@ public class GroovyProcessorBase
         {
             GroovyShell shell = new GroovyShell(binding);
 
-            result = shell.evaluate(groovy);
+            result = shell.evaluate("try{ " + groovy + " }catch(Exception e){ e.printStackTrace(); }");
             logEntry = new SimpleLogEntry(
                     "Groovy Result: "
                     + groovy + " replaced with " + result.toString());
