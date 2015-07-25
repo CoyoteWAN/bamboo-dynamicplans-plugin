@@ -21,8 +21,7 @@
     </web-resource>
     
     <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
-        <resource type="freemarker" name="edit" location="preConditionEdit.ftl"/>
-        <resource type="freemarker" name="view" location="preConditionView.ftl"/>
+        
         <description>Runs an arbitrary command on the command line before a build runs.</description>
     </preBuildAction>
     
