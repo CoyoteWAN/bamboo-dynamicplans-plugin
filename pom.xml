@@ -9,7 +9,7 @@
         <name>Valens Soft</name>
         <url>https://github.com/valenssoftware</url>
     </organization>
-    <name>dynamicPlans</name>
+    <name>bamboo-dynamicplans-plugin</name>
     <description>This is the org.valens:dynamicPlans plugin for Atlassian Bamboo.</description>
     <packaging>atlassian-plugin</packaging>
     <properties>

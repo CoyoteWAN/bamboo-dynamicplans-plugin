@@ -9,6 +9,7 @@ import com.atlassian.bamboo.build.CustomPreBuildAction;
 import com.atlassian.bamboo.build.SimpleLogEntry;
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
+import com.atlassian.bamboo.v2.build.BaseConfigurableBuildPlugin;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.v2.build.task.AbstractBuildTask;
 import com.atlassian.bamboo.variable.VariableContext;
@@ -28,12 +29,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
-public class GroovyResolver extends AbstractBuildTask implements
+public class DynamicTaskPreBuildAction extends BaseConfigurableBuildPlugin implements
         CustomPreBuildAction
 {
 
     private static final Logger log = Logger
-            .getLogger(GroovyResolver.class);
+            .getLogger(DynamicTaskPreBuildAction.class);
     GroovyProcessorBase gpb = null;
     
     public void init(@NotNull BuildContext buildContext)
@@ -43,8 +44,7 @@ public class GroovyResolver extends AbstractBuildTask implements
     }
 
     public ErrorCollection validate(BuildConfiguration config)
-    {
-        gpb.setBuildConfiguration(config);
+    {     
         return null;
     }
 

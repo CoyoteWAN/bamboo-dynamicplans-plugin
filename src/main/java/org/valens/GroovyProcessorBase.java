@@ -34,26 +34,10 @@ public class GroovyProcessorBase
 {
 
     BuildContext buildContext = null;
-    BuildConfiguration buildConfiguration = null;
-
+    
     public BuildContext getBuildContext()
     {
         return buildContext;
-    }
-
-    public void setBuildContext(BuildContext buildContext)
-    {
-        this.buildContext = buildContext;
-    }
-
-    public BuildConfiguration getBuildConfiguration()
-    {
-        return buildConfiguration;
-    }
-
-    public void setBuildConfiguration(BuildConfiguration buildConfiguration)
-    {
-        this.buildConfiguration = buildConfiguration;
     }
 
     private static final Logger log = Logger

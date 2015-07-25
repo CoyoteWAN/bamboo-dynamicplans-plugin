@@ -19,11 +19,18 @@
         <resource type="download" name="images/" location="/images"/>
         <context>groovyVars</context>
     </web-resource>
-    <!-- publish our component -->
-    <preBuildQueuedAction key="groovyResolverQueueAction" name="Bamboo Groovy Variables - Pre Build Queued Action" class="org.valens.GroovyResolverQueueAction"/>
-    <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.GroovyResolver" >
-        <resource type="freemarker" name="edit" location="preCommandRunnerEdit.ftl"/>
-        <resource type="freemarker" name="view" location="preCommandRunnerView.ftl"/>
+    
+    <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
+        <resource type="freemarker" name="edit" location="preConditionEdit.ftl"/>
+        <resource type="freemarker" name="view" location="preConditionView.ftl"/>
         <description>Runs an arbitrary command on the command line before a build runs.</description>
     </preBuildAction>
+    
+    <additionalBuildConfigurationPlugin key="groovyResolverActionConfig" name="Plan Dynamic Configuration"
+        class="org.valens.DynamicConfigurator">
+        <description>Plugin to configure what plans must not run simultaneously</description>
+        <resource type="freemarker" name="edit" location="preConditionEdit.ftl"/>
+        <resource type="freemarker" name="view" location="preConditionView.ftl"/>
+    </additionalBuildConfigurationPlugin>
+    
 </atlassian-plugin>
