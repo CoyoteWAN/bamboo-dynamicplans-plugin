@@ -24,10 +24,10 @@
         <description>Modifies the Job before it is queued</description>
     </preJobAction>
     
-    <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
+    <!--preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
         
         <description>Runs an arbitrary command on the command line before a build runs.</description>
-    </preBuildAction>
+    </preBuildAction-->
     
     <additionalBuildConfigurationPlugin key="groovyResolverActionConfig" name="Plan Dynamic Configuration"
         class="org.valens.DynamicConfigurator">

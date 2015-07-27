@@ -8,6 +8,7 @@ import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.repository.RepositoryDefinition;
 import com.atlassian.bamboo.task.TaskDefinition;
 import com.atlassian.bamboo.v2.build.BuildContext;
+import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.bamboo.variable.VariableDefinitionContext;
 import com.atlassian.bamboo.variable.VariableDefinitionContextImpl;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
@@ -32,7 +33,13 @@ import org.apache.log4j.Logger;
 public class GroovyProcessorBase
 {
     BuildContext buildContext = null;
-
+    CustomVariableContext customVariableContext = null;
+    private static final String CUSTOM_BAMBOO_TASK_ACTION = "custom.bamboo.task.action";
+    private static final String CUSTOM_BAMBOO_TASKS_REG_LIST = "custom.bamboo.tasks.reg.list";
+    private static final String CUSTOM_BAMBOO_CONDITION_LIST = "custom.bamboo.condition.list";
+    private static final String CUSTOMBAMBOOTASKLIST = "custom.bamboo.task.list";
+    private static final String SCRIPT = "script:";
+    
     public BuildContext getBuildContext()
     {
         return buildContext;
@@ -41,7 +48,7 @@ public class GroovyProcessorBase
     private static final Logger log = Logger
             .getLogger(GroovyProcessorBase.class);
 
-    GroovyProcessorBase(BuildContext buildContext)
+    GroovyProcessorBase(BuildContext buildContext, CustomVariableContext  customVariableContext )
     {
         this.buildContext = buildContext;
     }
@@ -190,11 +197,7 @@ public class GroovyProcessorBase
         }
 
     }
-    private static final String CUSTOM_BAMBOO_TASK_ACTION = "custom.bamboo.task.action";
-    private static final String CUSTOM_BAMBOO_TASKS_REG_LIST = "custom.bamboo.tasks.reg.list";
-    private static final String CUSTOM_BAMBOO_CONDITION_LIST = "custom.bamboo.condition.list";
-    private static final String CUSTOMBAMBOOTASKLIST = "custom.bamboo.task.list";
-    private static final String SCRIPT = "script:";
+    
 
     private String calculateGroovy(String name, Map nestedVariables, String groovy)
     {
@@ -209,8 +212,10 @@ public class GroovyProcessorBase
         Binding binding = new Binding();
         binding.setVariable("groovyVariableName", name);
 
+        
+        
         Iterator it = this.buildContext.getVariableContext()
-                .getEffectiveVariables().entrySet().iterator();
+                .getResultVariables().entrySet().iterator();
 
         while (it.hasNext())
         {
@@ -223,7 +228,7 @@ public class GroovyProcessorBase
             key = key.replace("\\.", "_");
             binding.setVariable(key, value);
         }
-
+                
         it = this.buildContext.getRepositoryDefinitions().iterator();
         while (it.hasNext())
         {
