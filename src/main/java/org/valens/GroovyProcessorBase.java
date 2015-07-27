@@ -1,4 +1,3 @@
-
 package org.valens;
 
 import com.atlassian.bamboo.build.BuildLoggerManager;
@@ -32,6 +31,7 @@ import org.apache.log4j.Logger;
  */
 public class GroovyProcessorBase
 {
+
     BuildContext buildContext = null;
     CustomVariableContext customVariableContext = null;
     private static final String CUSTOM_BAMBOO_TASK_ACTION = "custom.bamboo.task.action";
@@ -39,7 +39,7 @@ public class GroovyProcessorBase
     private static final String CUSTOM_BAMBOO_CONDITION_LIST = "custom.bamboo.condition.list";
     private static final String CUSTOMBAMBOOTASKLIST = "custom.bamboo.task.list";
     private static final String SCRIPT = "script:";
-    
+
     public BuildContext getBuildContext()
     {
         return buildContext;
@@ -48,7 +48,7 @@ public class GroovyProcessorBase
     private static final Logger log = Logger
             .getLogger(GroovyProcessorBase.class);
 
-    GroovyProcessorBase(BuildContext buildContext, CustomVariableContext  customVariableContext )
+    GroovyProcessorBase(BuildContext buildContext, CustomVariableContext customVariableContext)
     {
         this.buildContext = buildContext;
     }
@@ -63,8 +63,8 @@ public class GroovyProcessorBase
     private void processContext(Map<String, VariableDefinitionContext> context)
     {
         BuildLogger buildLogger = getBuildLoggerManager()
-                    .getLogger(this.buildContext.getPlanResultKey());
-        
+                .getLogger(this.buildContext.getPlanResultKey());
+
         try
         {
 
@@ -117,7 +117,6 @@ public class GroovyProcessorBase
                     }
                 }
             }
-            
 
             Map customConfiguration = buildContext.getBuildDefinition().getCustomConfiguration();
             if (customConfiguration == null || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST) == null
@@ -139,9 +138,9 @@ public class GroovyProcessorBase
                     if (td.getUserDescription().matches(expression))
                     {
                         td.setEnabled(false);
-                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task:" + td.getUserDescription())));
+                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task [" + td.getUserDescription() + "]")));
                     }
-                }  
+                }
             }
 
             if (customConfiguration == null || customConfiguration.get(CUSTOMBAMBOOTASKLIST) == null
@@ -157,30 +156,30 @@ public class GroovyProcessorBase
 
                 for (TaskDefinition td : this.buildContext.getTaskDefinitions())
                 {
-                    
-                    
+
                     if (td.getUserDescription().matches(value))
-                    {           
-                        boolean state = true;
-                        if(customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION) == null || customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("true"))
-                            state = false;
-                        
-                        td.setEnabled(state);
-                        
-                        
-                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Setting state :" 
-                                + state
-                                + " for task " 
-                                + td.getUserDescription())));
-                    }
-                    else
                     {
-                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry( 
-                                td.getUserDescription() + " is not matching " + value)));
+                        boolean state = true;
+                        if (customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION) == null || customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("false"))
+                        {
+                            state = false;
+                        }
+
+                        td.setEnabled(state);
+
+                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Setting state ["
+                                + state
+                                + "] for task ["
+                                + td.getUserDescription()
+                                + "]")));
+                    } else
+                    {
+                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry(
+                                "Task [" + td.getUserDescription() + "] is not matching [" + value + "]")));
                     }
 
                 }
-                
+
             }
 
         } catch (Exception e)
@@ -197,7 +196,6 @@ public class GroovyProcessorBase
         }
 
     }
-    
 
     private String calculateGroovy(String name, Map nestedVariables, String groovy)
     {
@@ -212,8 +210,6 @@ public class GroovyProcessorBase
         Binding binding = new Binding();
         binding.setVariable("groovyVariableName", name);
 
-        
-        
         Iterator it = this.buildContext.getVariableContext()
                 .getResultVariables().entrySet().iterator();
 
@@ -228,7 +224,7 @@ public class GroovyProcessorBase
             key = key.replace("\\.", "_");
             binding.setVariable(key, value);
         }
-                
+
         it = this.buildContext.getRepositoryDefinitions().iterator();
         while (it.hasNext())
         {
@@ -239,18 +235,22 @@ public class GroovyProcessorBase
                 String key = ((String) it1.next());
                 String varname = key.trim().replaceAll("\\.", "_") + "_" + rdef.getPosition();
                 value = rdef.getConfiguration().getString(key);
-                if(varname.trim().matches("[a-zA-Z0-9_]*"))
+                if (varname.trim().matches("[a-zA-Z0-9_]*"))
+                {
                     binding.setVariable(varname, value);
+                }
             }
         }
         log.info(buildLogger.addBuildLogEntry("GroovyShell bindings: "));
-        for ( it = binding.getVariables().keySet().iterator(); it.hasNext();)
+        for (it = binding.getVariables().keySet().iterator(); it.hasNext();)
         {
-            String s = (String) it.next();    
-            if(!s.toLowerCase().contains("password"))
-                 log.info(buildLogger.addBuildLogEntry("    " + s + "=" + binding.getVariable(s)));
+            String s = (String) it.next();
+            if (!s.toLowerCase().contains("password"))
+            {
+                log.info(buildLogger.addBuildLogEntry("    " + s + "=" + binding.getVariable(s)));
+            }
         }
-        
+
         log.info(buildLogger.addBuildLogEntry("Groovy Shell starting"));
         Object result = null;
         try
@@ -258,14 +258,16 @@ public class GroovyProcessorBase
             GroovyShell shell = new GroovyShell(binding);
 
             result = shell.evaluate("try{ " + groovy + " }catch(Exception e){ e.printStackTrace(); }");
-            
-            if(result == null)
+
+            if (result == null)
+            {
                 result = "null";
-            
+            }
+
             logEntry = new SimpleLogEntry(
-                    "Groovy Result: "
-                    + groovy + " replaced with " + result.toString());
-            
+                    "Groovy script "
+                    + groovy + " evaluated to [" + result.toString() + "]");
+
             log.info(buildLogger.addBuildLogEntry(logEntry));
         } catch (Throwable e)
         {
