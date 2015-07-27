@@ -2,6 +2,7 @@
 package org.valens;
 
 import com.atlassian.bamboo.build.BuildLoggerManager;
+import com.atlassian.bamboo.build.ErrorLogEntry;
 import com.atlassian.bamboo.build.SimpleLogEntry;
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.repository.RepositoryDefinition;
@@ -14,6 +15,8 @@ import com.atlassian.spring.container.ContainerManager;
 import com.google.common.collect.Maps;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -28,7 +31,6 @@ import org.apache.log4j.Logger;
  */
 public class GroovyProcessorBase
 {
-
     BuildContext buildContext = null;
 
     public BuildContext getBuildContext()
@@ -53,6 +55,9 @@ public class GroovyProcessorBase
 
     private void processContext(Map<String, VariableDefinitionContext> context)
     {
+        BuildLogger buildLogger = getBuildLoggerManager()
+                    .getLogger(this.buildContext.getPlanResultKey());
+        
         try
         {
 
@@ -105,14 +110,12 @@ public class GroovyProcessorBase
                     }
                 }
             }
-            BuildLogger buildLogger = getBuildLoggerManager()
-                    .getLogger(this.buildContext.getPlanResultKey());
+            
 
             Map customConfiguration = buildContext.getBuildDefinition().getCustomConfiguration();
             if (customConfiguration == null || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST) == null
                     || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST).toString().trim().length() == 0)
             {
-
                 log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("conditions not set, skipping")));
             } else
             {
@@ -130,11 +133,8 @@ public class GroovyProcessorBase
                     {
                         td.setEnabled(false);
                         log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task:" + td.getUserDescription())));
-
                     }
-
-                }
-
+                }  
             }
 
             if (customConfiguration == null || customConfiguration.get(CUSTOMBAMBOOTASKLIST) == null
@@ -153,11 +153,16 @@ public class GroovyProcessorBase
                     
                     
                     if (td.getUserDescription().matches(value))
-                    {                        
-                        td.setEnabled(customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("true"));
+                    {           
+                        boolean state = true;
+                        if(customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION) == null || customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("true"))
+                            state = false;
+                        
+                        td.setEnabled(state);
+                        
                         
                         log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Setting state :" 
-                                + customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString()
+                                + state
                                 + " for task " 
                                 + td.getUserDescription())));
                     }
@@ -169,14 +174,19 @@ public class GroovyProcessorBase
 
                 }
                 
-                
-
             }
 
         } catch (Exception e)
         {
             log.error("Bamboo Groovy Variables: an unexpected exception occurred."
                     + e.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            sw.toString(); // stack trace as a string
+            log.warn(buildLogger.addBuildLogEntry(new ErrorLogEntry(sw.toString())));
+
+            e.printStackTrace();
         }
 
     }

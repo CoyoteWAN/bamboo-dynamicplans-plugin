@@ -20,10 +20,9 @@
         <context>groovyVars</context>
     </web-resource>
     
-    <preBuildQueuedAction key="GroovyResolverQueueAction" name="Bamboo Groovy Variables - CustomPreBuildQueuedAction" class="org.valens.GroovyResolverQueueAction" >
-        
-        <description>Groovy Resolver Queue Action</description>
-    </preBuildQueuedAction>
+    <preJobAction key="myPreJobAction" class="org.valens.DynamicPlanPreJobAction">
+        <description>Modifies the Job before it is queued</description>
+    </preJobAction>
     
     <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
         
