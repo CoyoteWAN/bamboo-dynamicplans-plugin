@@ -20,6 +20,11 @@
         <context>groovyVars</context>
     </web-resource>
     
+    <preBuildQueuedAction key="GroovyResolverQueueAction" name="Bamboo Groovy Variables - CustomPreBuildQueuedAction" class="org.valens.GroovyResolverQueueAction" >
+        
+        <description>Groovy Resolver Queue Action</description>
+    </preBuildQueuedAction>
+    
     <preBuildAction key="groovyResolverAction" name="Bamboo Groovy Variables - Pre Build Action" class="org.valens.DynamicTaskPreBuildAction" >
         
         <description>Runs an arbitrary command on the command line before a build runs.</description>

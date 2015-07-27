@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.valens;
 
 import com.atlassian.bamboo.build.BuildLoggerManager;
@@ -154,6 +150,8 @@ public class GroovyProcessorBase
 
                 for (TaskDefinition td : this.buildContext.getTaskDefinitions())
                 {
+                    
+                    
                     if (td.getUserDescription().matches(value))
                     {                        
                         td.setEnabled(customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("true"));
@@ -170,6 +168,8 @@ public class GroovyProcessorBase
                     }
 
                 }
+                
+                
 
             }
 
