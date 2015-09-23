@@ -137,10 +137,9 @@ public class GroovyProcessorBase
                 {
                     if (td.getUserDescription().matches(expression))
                     {
-                        if(value.equalsIgnoreCase("false"))
+                        if(value.equalsIgnoreCase("true"))
                             td.setEnabled(false);
-                        else 
-                            td.setEnabled(true);
+                        
                         log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task [" + td.getUserDescription() + "]")));
                     }
                 }
