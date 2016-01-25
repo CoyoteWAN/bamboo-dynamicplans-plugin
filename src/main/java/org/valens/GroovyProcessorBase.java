@@ -212,7 +212,37 @@ public class GroovyProcessorBase
         Binding binding = new Binding();
         binding.setVariable("groovyVariableName", name);
 
-        Iterator it = this.buildContext.getVariableContext()
+        Iterator it=null;
+        
+        it = this.buildContext.getVariableContext().getOriginalVariables().entrySet().iterator();
+
+        while (it.hasNext())
+        {
+            Map.Entry item = (Map.Entry) it.next();
+
+            value = ((VariableDefinitionContext) item.getValue())
+                    .getValue();
+            String key = ((VariableDefinitionContext) item.getValue())
+                    .getKey();
+            key = key.replace("\\.", "_");
+            binding.setVariable(key, value);
+        }        
+        
+        it = this.buildContext.getVariableContext().getEffectiveVariables().entrySet().iterator();
+
+        while (it.hasNext())
+        {
+            Map.Entry item = (Map.Entry) it.next();
+
+            value = ((VariableDefinitionContext) item.getValue())
+                    .getValue();
+            String key = ((VariableDefinitionContext) item.getValue())
+                    .getKey();
+            key = key.replace("\\.", "_");
+            binding.setVariable(key, value);
+        }
+        
+        it = this.buildContext.getVariableContext()
                 .getResultVariables().entrySet().iterator();
 
         while (it.hasNext())
@@ -226,7 +256,7 @@ public class GroovyProcessorBase
             key = key.replace("\\.", "_");
             binding.setVariable(key, value);
         }
-
+        
         it = this.buildContext.getRepositoryDefinitions().iterator();
         while (it.hasNext())
         {
@@ -247,7 +277,7 @@ public class GroovyProcessorBase
         for (it = binding.getVariables().keySet().iterator(); it.hasNext();)
         {
             String s = (String) it.next();
-            if (!s.toLowerCase().contains("password"))
+            if (!s.toLowerCase().contains("password") && !s.toLowerCase().contains("key"))
             {
                 log.info(buildLogger.addBuildLogEntry("    " + s + "=" + binding.getVariable(s)));
             }
