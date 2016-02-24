@@ -224,7 +224,7 @@ public class GroovyProcessorBase
                     .getValue();
             String key = ((VariableDefinitionContext) item.getValue())
                     .getKey();
-            key = key.replace("\\.", "_");
+            key = key.replaceAll("\\.", "_");
             binding.setVariable(key, value);
         }        
         
@@ -238,7 +238,7 @@ public class GroovyProcessorBase
                     .getValue();
             String key = ((VariableDefinitionContext) item.getValue())
                     .getKey();
-            key = key.replace("\\.", "_");
+            key = key.replaceAll("\\.", "_");
             binding.setVariable(key, value);
         }
         
@@ -253,7 +253,7 @@ public class GroovyProcessorBase
                     .getValue();
             String key = ((VariableDefinitionContext) item.getValue())
                     .getKey();
-            key = key.replace("\\.", "_");
+            key = key.replaceAll("\\.", "_");
             binding.setVariable(key, value);
         }
         
