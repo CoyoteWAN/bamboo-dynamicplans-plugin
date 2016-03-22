@@ -70,11 +70,9 @@ public class GroovyProcessorBase
 
             Map<String, VariableDefinitionContext> nestedVariables = Maps.newHashMap();
 
-            Iterator it = context.entrySet().iterator();
-
             String value;
 
-            it = context.entrySet().iterator();
+            Iterator it = context.entrySet().iterator();
             while (it.hasNext())
             {
                 Map.Entry item = (Map.Entry) it.next();
@@ -83,7 +81,7 @@ public class GroovyProcessorBase
                         .getValue();
                 String key = ((VariableDefinitionContext) item.getValue())
                         .getKey();
-                if (value.startsWith(SCRIPT))
+                if (value != null ? value.startsWith(SCRIPT) : false)
                 {
                     value = calculateGroovy(key, nestedVariables, value.substring(SCRIPT.length()));
                 }
@@ -103,7 +101,7 @@ public class GroovyProcessorBase
             {
                 for (String key : nestedVariables.keySet())
                 {
-                    VariableDefinitionContext item = (VariableDefinitionContext) nestedVariables
+                    VariableDefinitionContext item = nestedVariables
                             .get(key);
                     if (item != null)
                     {
@@ -119,7 +117,7 @@ public class GroovyProcessorBase
             }
 
             Map customConfiguration = buildContext.getBuildDefinition().getCustomConfiguration();
-            if (customConfiguration == null || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST) == null
+            if (customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST) == null
                     || customConfiguration.get(CUSTOM_BAMBOO_CONDITION_LIST).toString().trim().length() == 0)
             {
                 log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("conditions not set, skipping")));
@@ -135,20 +133,21 @@ public class GroovyProcessorBase
 
                 for (TaskDefinition td : this.buildContext.getTaskDefinitions())
                 {
-                    if (td.getUserDescription().matches(expression))
+                    if (td.getUserDescription() != null && td.getUserDescription().matches(expression))
                     {
-                        if(value.equalsIgnoreCase("true"))
+                        if(value.equalsIgnoreCase("true")) {
                             td.setEnabled(false);
-                        
-                        log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task [" + td.getUserDescription() + "]")));
+                            log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Disabling task [" + td.getUserDescription() + "]")));
+                        } else {
+                            log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("Skipping task [" + td.getUserDescription() + "]")));
+                        }
                     }
                 }
             }
 
-            if (customConfiguration == null || customConfiguration.get(CUSTOMBAMBOOTASKLIST) == null
+            if (customConfiguration.get(CUSTOMBAMBOOTASKLIST) == null
                     || customConfiguration.get(CUSTOMBAMBOOTASKLIST).toString().trim().length() == 0)
             {
-
                 log.warn(buildLogger.addBuildLogEntry(new SimpleLogEntry("tasks list not set, skipping")));
             } else
             {
@@ -159,7 +158,7 @@ public class GroovyProcessorBase
                 for (TaskDefinition td : this.buildContext.getTaskDefinitions())
                 {
 
-                    if (td.getUserDescription().matches(value))
+                    if (td.getUserDescription() != null && td.getUserDescription().matches(value))
                     {
                         boolean state = true;
                         if (customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION) == null || customConfiguration.get(CUSTOM_BAMBOO_TASK_ACTION).toString().equalsIgnoreCase("false"))
@@ -191,7 +190,6 @@ public class GroovyProcessorBase
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            sw.toString(); // stack trace as a string
             log.warn(buildLogger.addBuildLogEntry(new ErrorLogEntry(sw.toString())));
 
             e.printStackTrace();
@@ -212,9 +210,7 @@ public class GroovyProcessorBase
         Binding binding = new Binding();
         binding.setVariable("groovyVariableName", name);
 
-        Iterator it=null;
-        
-        it = this.buildContext.getVariableContext().getOriginalVariables().entrySet().iterator();
+        Iterator it = this.buildContext.getVariableContext().getOriginalVariables().entrySet().iterator();
 
         while (it.hasNext())
         {
@@ -307,7 +303,7 @@ public class GroovyProcessorBase
 
             e.printStackTrace();
         }
-        return result.toString();
+        return result != null ? result.toString() : null;
 
     }
 
